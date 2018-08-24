@@ -116,13 +116,13 @@ int main(void)
 			}
 
 			
-			uint16_t rezAtmPressureGPa_uint =  (uint16_t)(pressure * 10);
+			uint16_t rezAtmPressureGPa_uint =  (uint16_t)pressure;
 			uint16_t rezHumidity_uint =        (uint16_t)(humidity * 10);
 			int16_t rezTemperature_int = (int16_t)(temperature * 10);			
 			
 			
 			
-		size_UART = sprintf((char *)Data,"Pressure: %.2f Pa, Temperature: %.2f C, Humidity: %.2f\n\r",
+		size_UART = sprintf((char *)Data,"Pressure: %.2f GPa, Temperature: %.2f C, Humidity: %.2f\n\r",
 				pressure, temperature, humidity);
 		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		
 

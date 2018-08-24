@@ -3,7 +3,7 @@
 <title>Static Call Graph - [666_L011F4_only_HAL\666_L011F4_only_HAL.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image 666_L011F4_only_HAL\666_L011F4_only_HAL.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Thu Aug 23 16:27:22 2018
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060422: Last Updated: Fri Aug 24 10:02:38 2018
 <BR><P>
 <H3>Maximum Stack Usage =        256 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -179,7 +179,7 @@ Global Symbols
 
 <P><STRONG><a name="[a6]"></a>_ll_mul</STRONG> (Thumb, 0 bytes, Stack size 64 bytes, llmul.o(.text), UNUSED)
 
-<P><STRONG><a name="[99]"></a>__aeabi_fmul</STRONG> (Thumb, 122 bytes, Stack size 16 bytes, fmul.o(.text))
+<P><STRONG><a name="[9a]"></a>__aeabi_fmul</STRONG> (Thumb, 122 bytes, Stack size 16 bytes, fmul.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = __aeabi_fmul
 </UL>
 <BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -219,7 +219,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[9a]"></a>__aeabi_f2uiz</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, ffixui.o(.text))
+<P><STRONG><a name="[99]"></a>__aeabi_f2uiz</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, ffixui.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -915,7 +915,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[97]"></a>bmp280_init_default_params</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, bmp280.o(i.bmp280_init_default_params))
+<P><STRONG><a name="[97]"></a>bmp280_init_default_params</STRONG> (Thumb, 20 bytes, Stack size 0 bytes, bmp280.o(i.bmp280_init_default_params))
 <BR><BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
@@ -940,15 +940,15 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[19]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[19]"></a>main</STRONG> (Thumb, 540 bytes, Stack size 32 bytes, main.o(i.main))
+<P><STRONG><a name="[19]"></a>main</STRONG> (Thumb, 534 bytes, Stack size 32 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = main &rArr; bmp280_read_float &rArr; bmp280_read_fixed &rArr; read_data &rArr; HAL_I2C_Mem_Read &rArr; I2C_RequestMemoryRead &rArr; I2C_WaitOnTXISFlagUntilTimeout &rArr; I2C_IsAcknowledgeFailed
 </UL>
 <BR>[Calls]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;send_data_NRF
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bmp280_read_float
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bmp280_init_default_params
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;bmp280_init
-<LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
-<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2uiz
+<LI><a href="#[9a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
+<LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2uiz
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2iz
 <LI><a href="#[9c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_f2d
 <LI><a href="#[37]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NRF_writereg
