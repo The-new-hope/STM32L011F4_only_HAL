@@ -1,7 +1,5 @@
-
 /* Includes ------------------------------------------------------------------*/
 #include "header.h"
-
 /* Private variables ---------------------------------------------------------*/
 BMP280_HandleTypedef bmp280;
 I2C_HandleTypeDef hi2c1;
@@ -11,8 +9,10 @@ UART_HandleTypeDef huart2;
 /* Private variables ---------------------------------------------------------*/
 float pressure, temperature, humidity;
 
-uint8_t buffer_RX[10];
-uint8_t buffer_TX[]={0x46,0x75,0x63,0x6b,0x65,0x64,0x20,0x6f,0x66,0x66}; ////
+uint8_t buffer_RX[RF_DATA_SIZE];
+//uint8_t buffer_TX[]={0x46,0x75,0x63,0x6b,0x65,0x64,0x20,0x6f,0x66,0x66}; ////
+uint8_t buffer_TX[RF_DATA_SIZE]; ////
+
 uint8_t status_TX = 0;
 uint8_t status_RX = 0;
 
@@ -20,7 +20,7 @@ uint8_t Tcounter = 0;
 uint8_t Tcounter1 = 0;
 
 uint16_t size_UART;
-uint8_t Data[128];
+uint8_t Data[255];
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -72,20 +72,16 @@ int main(void)
 	bmp280.addr = BMP280_I2C_ADDRESS_0;
 	bmp280.i2c = &hi2c1;
 
-//	NRF_cmd(FLUSH_TX);
-//	NRF_cmd(FLUSH_RX);
 	HAL_Delay(500);
-	uint8_t result_start = Conf_NRF_Rx(); // конфигурируем NRF как приёмник
-		if (result_start==1){
-		size_UART = sprintf((char *)Data, "Conf Rx OK\n\r");
-		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
+		if (Conf_NRF_Rx()==1){							// configure NRF as receiver
+			size_UART = sprintf((char *)Data, "Conf Rx OK\n\r");
+			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
 		}else{
-		size_UART = sprintf((char *)Data, "Conf Rx BAD\n\r");
-		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
+			size_UART = sprintf((char *)Data, "Conf Rx BAD\n\r");
+			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
 		}
-
-	uint8_t status = NRF_readreg(STATUS);							//прочитали статус регистр STATUS
-	NRF_writereg(STATUS, status);							//записали статус регистр STATUS тем самым сбросив его
+//	uint8_t status = NRF_readreg(STATUS);							//read register STATUS
+//	NRF_writereg(STATUS, status);							//write register STATUS and clear him
 
 	while (!bmp280_init(&bmp280, &bmp280.params)) {
 		size_UART = sprintf((char *)Data, "BMP280 initialization failed\n");
@@ -93,20 +89,20 @@ int main(void)
 		HAL_Delay(2000);
 	}
 	bool bme280p = bmp280.id == BME280_CHIP_ID;
-	size_UART = sprintf((char *)Data, "BMP280: found %s\n\r", bme280p ? "BME280" : "BMP280");
+	size_UART = sprintf((char *)Data, "Sensor found %s\n\r", bme280p ? "BME280" : "BMP280");
 	HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);	
 	
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {	
-//		check_NRF();
-		if (Tcounter >= 10) {
+//		check_NRF(); // Если нужно будет Принимать данные
+		if (Tcounter >= TIME_FLASH_LED) {
 			GPIOB->ODR^=(GPIO_PIN_1);
 			Tcounter = 0;	
 		}
 
-		if (Tcounter1 >= 50) {		// Каждые 5 сек выполняем
+		if (Tcounter1 >= TIME_SENDING) {		// Каждые 5 сек выполняем
 			Tcounter1 = 0;
 	
 		while (!bmp280_read_float(&bmp280, &temperature, &pressure, &humidity)) {
@@ -119,29 +115,56 @@ int main(void)
 			uint16_t rezAtmPressureGPa_uint =  (uint16_t)pressure;
 			uint16_t rezHumidity_uint =        (uint16_t)(humidity * 10);
 			int16_t rezTemperature_int = (int16_t)(temperature * 10);			
-			
+			uint16_t rezAtmPressure_uint = (uint16_t)pressure * 0.75;
 			
 			
 		size_UART = sprintf((char *)Data,"Pressure: %.2f GPa, Temperature: %.2f C, Humidity: %.2f\n\r",
 				pressure, temperature, humidity);
 		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		
 
-		size_UART = sprintf((char *)Data,"Pressure: %X GPa, Temperature: %.2f C, Humidity: %.2f\n\r",
-				rezAtmPressureGPa_uint, rezTemperature_int, rezHumidity_uint);
-		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
+//_______________________________________
+//№ байта  |    описание   buffer_TX[]   |
+//_________|_____________________________| 
+//   0     |    статус - LSB 
+//   1     |    статус - MSB 
+//   2     |    температура int16_t - LSB 
+//   3     |    температура int16_t - MSB 
+//   4     |    влажность uint16_t   - LSB 
+//   5     |    влажность uint16_t   - MSB 
+//   6     |    давление, мм. рт. ст uint16_t - LSB 
+//   7     |    давление, мм. рт. ст uint16_t - MSB 
+//   8     |    давление, гПа uint16_t - LSB 
+//   9     |    давление, гПа uint16_t - MSB      		
 
 		
-			
+		buffer_TX[0]=0;
+		buffer_TX[1]=0;
+		buffer_TX[2]=rezTemperature_int & 0xFF;	// младший
+		buffer_TX[3]=rezTemperature_int >> 8;		// старший
+		buffer_TX[4]=rezHumidity_uint & 0xFF;
+		buffer_TX[5]=rezHumidity_uint >> 8;
+		buffer_TX[6]=rezAtmPressure_uint & 0xFF;
+		buffer_TX[7]=rezAtmPressure_uint >> 8;
+		buffer_TX[8]=rezAtmPressureGPa_uint & 0xFF;
+		buffer_TX[9]=rezAtmPressureGPa_uint >> 8;
+		
+
+	
 			send_data_NRF(buffer_TX,10);
 			if (status_TX ==1){
 				status_TX = 0;
 				size_UART = sprintf((char *)Data, "Transmit OK\n\r");
 				HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);				
-			}			
+			}	else {
+							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
+							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
+						}	
+
+
+
+			
 		}	
   }
-  /* USER CODE END 3 */
-
 }
 
 /**

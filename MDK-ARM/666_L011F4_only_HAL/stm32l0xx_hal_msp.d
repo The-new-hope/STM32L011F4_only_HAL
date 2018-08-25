@@ -32,3 +32,12 @@
 666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim_ex.h
 666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h
 666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/header.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\inttypes.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/BMP280/bmp280.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/header.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/BMP280/bmp280.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/NRF/NRF24L01.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+666_l011f4_only_hal\stm32l0xx_hal_msp.o: ../Inc/NRF/NRF24L01.h

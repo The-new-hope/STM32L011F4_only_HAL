@@ -1,7 +1,7 @@
 Dependencies for Project '666_L011F4_only_HAL', Target '666_L011F4_only_HAL': (DO NOT MODIFY !)
 F (startup_stm32l011xx.s)(0x5B59D7FC)(--cpu Cortex-M0+ --pd "__EVAL SETA 1" -g --apcs=interwork --pd "__MICROLIB SETA 1"-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include--pd "__UVISION_VERSION SETA 523" --pd "_RTE_ SETA 1" --pd "STM32L011xx SETA 1"--list startup_stm32l011xx.lst --xref -o 666_l011f4_only_hal\startup_stm32l011xx.o --depend 666_l011f4_only_hal\startup_stm32l011xx.d)
-F (../Src/main.c)(0x5B7FAD81)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\main.o --omf_browse 666_l011f4_only_hal\main.crf --depend 666_l011f4_only_hal\main.d)
-I (../Inc/header.h)(0x5B75596B)
+F (../Src/main.c)(0x5B8177E4)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\main.o --omf_browse 666_l011f4_only_hal\main.crf --depend 666_l011f4_only_hal\main.d)
+I (../Inc/header.h)(0x5B815E7A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x57F64D08)
@@ -73,7 +73,7 @@ I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim_ex.h)(0x5A7AB55B)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h)(0x5A7AB55B)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h)(0x5A7AB55B)
 I (../Inc/stm32l0xx_it.h)(0x5B72BC10)
-F (../Src/stm32l0xx_hal_msp.c)(0x5B59D7F9)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\stm32l0xx_hal_msp.o --omf_browse 666_l011f4_only_hal\stm32l0xx_hal_msp.crf --depend 666_l011f4_only_hal\stm32l0xx_hal_msp.d)
+F (../Src/stm32l0xx_hal_msp.c)(0x5B815433)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\stm32l0xx_hal_msp.o --omf_browse 666_l011f4_only_hal\stm32l0xx_hal_msp.crf --depend 666_l011f4_only_hal\stm32l0xx_hal_msp.d)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h)(0x5A7AB55B)
 I (../Inc/stm32l0xx_hal_conf.h)(0x5B59D7FA)
 I (../Inc/main.h)(0x5B59D7FA)
@@ -106,8 +106,14 @@ I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim.h)(0x5A7AB55B)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim_ex.h)(0x5A7AB55B)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h)(0x5A7AB55B)
 I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h)(0x5A7AB55B)
+I (../Inc/header.h)(0x5B815E7A)
+I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x57F64D08)
+I (C:\Keil_v5\ARM\ARMCC\include\inttypes.h)(0x57F64D06)
+I (../Inc/BMP280/bmp280.h)(0x5B5AD876)
+I (../Inc/NRF/NRF24L01.h)(0x5B7E8BA6)
+I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x57F64D08)
 F (..\Inc\BMP280\bmp280.c)(0x5B7FAD81)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\bmp280.o --omf_browse 666_l011f4_only_hal\bmp280.crf --depend 666_l011f4_only_hal\bmp280.d)
-I (../Inc/header.h)(0x5B75596B)
+I (../Inc/header.h)(0x5B815E7A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x57F64D08)
@@ -145,8 +151,8 @@ I (../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h)(0x5A7AB55B)
 I (../Inc/BMP280/bmp280.h)(0x5B5AD876)
 I (../Inc/NRF/NRF24L01.h)(0x5B7E8BA6)
 I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x57F64D08)
-F (..\Inc\NRF\NRF24L01.c)(0x5B7EAD84)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\nrf24l01.o --omf_browse 666_l011f4_only_hal\nrf24l01.crf --depend 666_l011f4_only_hal\nrf24l01.d)
-I (../Inc/header.h)(0x5B75596B)
+F (..\Inc\NRF\NRF24L01.c)(0x5B816126)(--c99 -c --cpu Cortex-M0+ -D__EVAL -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc -I ../Drivers/STM32L0xx_HAL_Driver/Inc/Legacy -I ../Drivers/CMSIS/Device/ST/STM32L0xx/Include -I ../Drivers/CMSIS/Include-I.\RTE\_666_L011F4_only_HAL-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.0.1\CMSIS\Include-IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include-D__UVISION_VERSION="523" -D_RTE_ -DSTM32L011xx -DUSE_HAL_DRIVER -DSTM32L011xx-o 666_l011f4_only_hal\nrf24l01.o --omf_browse 666_l011f4_only_hal\nrf24l01.crf --depend 666_l011f4_only_hal\nrf24l01.d)
+I (../Inc/header.h)(0x5B815E7A)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x57F64D08)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x57F64D08)
