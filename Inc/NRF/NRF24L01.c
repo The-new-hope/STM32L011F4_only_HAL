@@ -1,6 +1,6 @@
 #include "header.h"
-uint8_t self_addr[] = {0x4D, 0x45, 0x54, 0x45, 0x4F}; // Собственный адрес
-uint8_t remote_addr[] = {0x4D, 0x45, 0x54, 0x45, 0x4F}; // Адрес удалённой стороны
+uint8_t self_addr[] = OWN_ADDRESS;
+uint8_t remote_addr[] = REMOTE_ADDRESS;
 extern uint8_t Tcounter;
 extern uint8_t Tcounter1;
 extern uint8_t buffer_RX[];
@@ -187,17 +187,17 @@ uint8_t Conf_NRF_Rx(){	  //режим према RX
 	  NRF_writereg(RX_PW_P0,RF_DATA_SIZE); //размер поля данных, байт.
 //	  NRF_writereg(ENAA_P4,0); //выключить автоподтверждение по каналу 4
 	  NRF_writereg(RF_CH, CHAN); 
-	  NRF_writereg(RF_SETUP, RF_SETUP_250KBPS | RF_SETUP_1MBPS); // выбор скорости 250 kбит/с и мощности 0dBm
-	  NRF_writereg(SETUP_RETR, SETUP_RETR_DELAY_750MKS); // Задержка для скорости 250	kбит/с
+	  NRF_writereg(RF_SETUP, RF_SPEED); // выбор скорости 250 kбит/с и мощности 0dBm
+	  NRF_writereg(SETUP_RETR, SETUP_RETR_DELAY_1000MKS); // Delay for speed 250	kбит/с
 	  NRF_writereg_buf(RX_ADDR_P0, &remote_addr[0], 5);
 	  NRF_writereg_buf(TX_ADDR, &remote_addr[0], 5);
 	  NRF_writereg_buf(RX_ADDR_P4, &self_addr[0], 5);
-	  NRF_writereg(CONFIG,(1<<EN_CRC)|(1<<PWR_UP)|(0<<PRIM_RX));
+	  NRF_writereg(CONFIG,(1<<EN_CRC)|(1<<CRCO)|(1<<PWR_UP)|(0<<PRIM_RX));
 	  DelayMicro(3);
-	  NRF_writereg(CONFIG,(1<<EN_CRC)|(1<<PWR_UP)|(1<<PRIM_RX));
+	  NRF_writereg(CONFIG,(1<<EN_CRC)|(1<<CRCO)|(1<<PWR_UP)|(1<<PRIM_RX));
 	  CE1;
 	  DelayMicro(140);
-	  return (NRF_readreg(CONFIG) == ((1 << EN_CRC) | (1 << PWR_UP) | (1 << PRIM_RX))) ? 1 : 0;
+	  return (NRF_readreg(CONFIG) == ((1 << EN_CRC) |(1<<CRCO)| (1 << PWR_UP) | (1 << PRIM_RX))) ? 1 : 0;
  }
 //***********************************************************************************************************
 uint8_t Conf_NRF_Tx(){
@@ -206,17 +206,17 @@ uint8_t Conf_NRF_Tx(){
 		NRF_writereg(RX_PW_P0,RF_DATA_SIZE);//размер поля данных, байт.
 //	  NRF_writereg(ENAA_P4,0);//выключить автоподтверждение по каналу 0
 		NRF_writereg(RF_CH, CHAN); // Выбор частотного канала
-	  NRF_writereg(RF_SETUP, RF_SETUP_250KBPS | RF_SETUP_1MBPS); // выбор скорости 250 kбит/с и мощности 0dBm
-	  NRF_writereg(SETUP_RETR, SETUP_RETR_DELAY_750MKS); // Задержка для скорости 250 kбит/с	
+	  NRF_writereg(RF_SETUP, RF_SPEED); // выбор скорости 250 kбит/с и мощности 0dBm
+	  NRF_writereg(SETUP_RETR, SETUP_RETR_DELAY_1000MKS); // Delay for speed 250 kбит/с	
 	  NRF_writereg_buf(RX_ADDR_P0, &remote_addr[0], 5); // Подтверждения приходят на канал 0
 	  NRF_writereg_buf(TX_ADDR, &remote_addr[0], 5);
-	  NRF_writereg_buf(RX_ADDR_P4, &self_addr[0], 5);
-	  NRF_writereg(CONFIG,(1<<PWR_UP)|(1<<EN_CRC)|(0<<PRIM_RX)|(0 << MASK_MAX_RT));
+//	  NRF_writereg_buf(RX_ADDR_P0, &self_addr[0], 5);
+	  NRF_writereg(CONFIG,(1<<PWR_UP)|(1<<EN_CRC)|(1<<CRCO)|(0<<PRIM_RX)|(0 << MASK_MAX_RT));
 	  CE1;
 	  DelayMicro(15);
 	  CE0;
 	  DelayMicro(140);
-	  return (NRF_readreg(CONFIG) == ((1 << EN_CRC) | (1 << PWR_UP) | (0 << PRIM_RX) | (0 << MASK_MAX_RT))) ? 1 : 0;
+	  return (NRF_readreg(CONFIG) == ((1 << EN_CRC)|(1<<CRCO) | (1 << PWR_UP) | (0 << PRIM_RX) | (0 << MASK_MAX_RT))) ? 1 : 0;
  }
 
 

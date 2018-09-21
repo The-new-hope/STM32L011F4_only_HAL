@@ -123,9 +123,9 @@
 #define RF_SETUP_MINUS6DBM  (2 << RF_PWR)
 #define RF_SETUP_0DBM       (3 << RF_PWR)
 
-#define RF_SETUP_1MBPS (0 << RF_DR_HIGH)
-#define RF_SETUP_2MBPS (1 << RF_DR_HIGH)
-#define RF_SETUP_250KBPS (1 << RF_DR_LOW) 
+#define RF_SETUP_1MBPS (0 << RF_DR_HIGH)|(0 << RF_DR_LOW)
+#define RF_SETUP_2MBPS (1 << RF_DR_HIGH)|(0 << RF_DR_LOW)
+#define RF_SETUP_250KBPS (1 << RF_DR_LOW)|(0 << RF_DR_HIGH) 
 
 // STATUS
 #define RX_DR   6 // Флаг получения новых данных в FIFO приёмника. Для сброса флага нужно записать 1

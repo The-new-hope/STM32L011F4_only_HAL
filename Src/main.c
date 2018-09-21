@@ -137,20 +137,20 @@ int main(void)
 //   9     |    давление, гѕа uint16_t - MSB      		
 
 		
+//		buffer_TX[0]=0;
 		buffer_TX[0]=0;
-		buffer_TX[1]=0;
-		buffer_TX[2]=rezTemperature_int & 0xFF;	// младший
-		buffer_TX[3]=rezTemperature_int >> 8;		// старший
-		buffer_TX[4]=rezHumidity_uint & 0xFF;
-		buffer_TX[5]=rezHumidity_uint >> 8;
-		buffer_TX[6]=rezAtmPressure_uint & 0xFF;
-		buffer_TX[7]=rezAtmPressure_uint >> 8;
-		buffer_TX[8]=rezAtmPressureGPa_uint & 0xFF;
-		buffer_TX[9]=rezAtmPressureGPa_uint >> 8;
+		buffer_TX[1]=rezTemperature_int & 0xFF;	// младший
+		buffer_TX[2]=rezTemperature_int >> 8;		// старший
+		buffer_TX[3]=rezHumidity_uint & 0xFF;
+		buffer_TX[4]=rezHumidity_uint >> 8;
+		buffer_TX[5]=rezAtmPressure_uint & 0xFF;
+		buffer_TX[6]=rezAtmPressure_uint >> 8;
+		buffer_TX[7]=rezAtmPressureGPa_uint & 0xFF;
+		buffer_TX[8]=rezAtmPressureGPa_uint >> 8;
 		
 
 	
-			send_data_NRF(buffer_TX,10);
+			send_data_NRF(buffer_TX,RF_DATA_SIZE);
 			if (status_TX ==1){
 				status_TX = 0;
 				size_UART = sprintf((char *)Data, "Transmit OK\n\r");

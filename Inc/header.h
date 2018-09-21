@@ -9,10 +9,18 @@
 #include "NRF/NRF24L01.h"		// Description of registers and commands NRF24L01+
 
 // Setting of NRF24L01+
-#define CHAN		4 // channel number
-#define RF_DATA_SIZE		10 // size of sendind data, bytes
-#define TIME_SENDING		50 // Frequnce of sending data = 1/10 sek // 50 = 5 sek
+//										M			E			T			E			O			//ASCII code
+//#define OWN_ADDRESS	{0x4D, 0x45, 0x54, 0x45, 0x4F}; // Own address
+//#define REMOTE_ADDRESS	{0x4D, 0x45, 0x54, 0x45, 0x4F}; // Remote address
+#define OWN_ADDRESS	"METEO"; // Own address
+#define REMOTE_ADDRESS	"METEO"; // Remote address
+#define CHAN		10 // channel number
+#define RF_DATA_SIZE		9 // size of sendind data, bytes
+#define RF_SPEED	RF_SETUP_250KBPS // size of sendind data: RF_SETUP_2MBPS, RF_SETUP_1MBPS or RF_SETUP_250KBPS
+
+#define TIME_SENDING		10 // Frequnce of sending data = 1/10 sek // 50 = 5 sek
 #define TIME_FLASH_LED		10 // Frequnce of flash led = 1/10 sek // 10 = 1 sek
+//See also settings have in file NRF24L01.c
 
 // SPI setting
 #define SPIx_RCC		RCC_APB1Periph_SPI1
