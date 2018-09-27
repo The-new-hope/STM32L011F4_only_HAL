@@ -9,10 +9,8 @@ UART_HandleTypeDef huart2;
 /* Private variables ---------------------------------------------------------*/
 float pressure, temperature, humidity;
 
-uint8_t buffer_RX[RF_DATA_SIZE];
-//uint8_t buffer_TX[]={0x46,0x75,0x63,0x6b,0x65,0x64,0x20,0x6f,0x66,0x66}; ////
+//uint8_t buffer_RX[RF_DATA_SIZE];
 uint8_t buffer_TX[RF_DATA_SIZE]; ////
-
 uint8_t status_TX = 0;
 uint8_t status_RX = 0;
 
@@ -40,7 +38,10 @@ static void MX_NVIC_Init(void);
 //  /* Wait till done */
 //  while (micros--) ;
 //}
-
+//void USART2_IRQHandler(void)
+//{
+//  HAL_UART_IRQHandler(&huart2);
+//}
 void TIM2_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htim2);
@@ -73,15 +74,15 @@ int main(void)
 	bmp280.i2c = &hi2c1;
 
 	HAL_Delay(500);
-		if (Conf_NRF_Rx()==1){							// configure NRF as receiver
-			size_UART = sprintf((char *)Data, "Conf Rx OK\n\r");
-			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-		}else{
-			size_UART = sprintf((char *)Data, "Conf Rx BAD\n\r");
-			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-		}
-//	uint8_t status = NRF_readreg(STATUS);							//read register STATUS
-//	NRF_writereg(STATUS, status);							//write register STATUS and clear him
+//		if (Conf_NRF_Rx()==1){							// configure NRF as receiver
+//			size_UART = sprintf((char *)Data, "Conf Rx OK\n\r");
+//			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
+//		}else{
+//			size_UART = sprintf((char *)Data, "Conf Rx BAD\n\r");
+//			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
+//		}
+		Conf_NRF_Rx();
+
 
 	while (!bmp280_init(&bmp280, &bmp280.params)) {
 		size_UART = sprintf((char *)Data, "BMP280 initialization failed\n");
@@ -91,6 +92,8 @@ int main(void)
 	bool bme280p = bmp280.id == BME280_CHIP_ID;
 	size_UART = sprintf((char *)Data, "Sensor found %s\n\r", bme280p ? "BME280" : "BMP280");
 	HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);	
+	
+	
 	
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -139,8 +142,8 @@ int main(void)
 		
 //		buffer_TX[0]=0;
 		buffer_TX[0]=0;
-		buffer_TX[1]=rezTemperature_int & 0xFF;	// младший
-		buffer_TX[2]=rezTemperature_int >> 8;		// старший
+		buffer_TX[1]=rezTemperature_int & 0xFF;	// LSB
+		buffer_TX[2]=rezTemperature_int >> 8;		// MSB
 		buffer_TX[3]=rezHumidity_uint & 0xFF;
 		buffer_TX[4]=rezHumidity_uint >> 8;
 		buffer_TX[5]=rezAtmPressure_uint & 0xFF;
@@ -153,12 +156,12 @@ int main(void)
 			send_data_NRF(buffer_TX,RF_DATA_SIZE);
 			if (status_TX ==1){
 				status_TX = 0;
-				size_UART = sprintf((char *)Data, "Transmit OK\n\r");
-				HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);				
-			}	else {
-							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
-							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
-						}	
+//				size_UART = sprintf((char *)Data, "Transmit OK\n\r");
+//				HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);				
+			}//	else {
+//							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
+//							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
+//						}	
 
 
 
