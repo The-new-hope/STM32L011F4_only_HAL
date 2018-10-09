@@ -156,8 +156,7 @@ int main(void)
 			send_data_NRF(buffer_TX,RF_DATA_SIZE);
 			if (status_TX ==1){
 				status_TX = 0;
-//				size_UART = sprintf((char *)Data, "Transmit OK\n\r");
-//				HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);				
+				
 			}//	else {
 //							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
 //							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
