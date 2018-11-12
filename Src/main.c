@@ -6,6 +6,8 @@ I2C_HandleTypeDef hi2c1;
 SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim2;
 UART_HandleTypeDef huart2;
+PWR_PVDTypeDef sConfigPVD;
+IWDG_HandleTypeDef hiwdg;
 /* Private variables ---------------------------------------------------------*/
 float pressure, temperature, humidity;
 
@@ -18,7 +20,7 @@ uint8_t Tcounter = 0;
 uint8_t Tcounter1 = 0;
 
 uint16_t size_UART;
-uint8_t Data[255];
+uint8_t Data[100];
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -29,24 +31,20 @@ static void MX_SPI1_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_NVIC_Init(void);
+static void MX_IWDG_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-/* Раскомментировать, если здесь нужны микросекунды---------------------------*/
-//__STATIC_INLINE void DelayMicro(__IO uint32_t micros)
-//{
-//  micros *= (SystemCoreClock / 1000000) / 8;
-//  /* Wait till done */
-//  while (micros--) ;
-//}
-//void USART2_IRQHandler(void)
-//{
-//  HAL_UART_IRQHandler(&huart2);
-//}
 void TIM2_IRQHandler(void)
 {
   HAL_TIM_IRQHandler(&htim2);
 	Tcounter ++;
   Tcounter1 ++;
+}
+
+void PVD_IRQHandler(void)
+{
+  HAL_PWR_PVD_IRQHandler();
+	buffer_TX[0] |= (1<<3);	
 }
 
 int main(void)
@@ -63,109 +61,103 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
 	MX_NVIC_Init();
+  MX_IWDG_Init();	
 	HAL_UART_MspInit(&huart2);
-//__HAL_UART_ENABLE_IT(&huart2, UART_IT_RXNE); // разрешаем прерывание по приему от UART2
 
 	HAL_TIM_Base_Start(&htim2);
   HAL_TIM_Base_Start_IT(&htim2);
 
+	sConfigPVD.PVDLevel = Power_Level;
+  sConfigPVD.Mode = PWR_PVD_MODE_IT_RISING;
+  HAL_PWR_ConfigPVD(&sConfigPVD);	
+	
+  HAL_PWR_EnablePVD();	
+	
 	bmp280_init_default_params(&bmp280.params);
 	bmp280.addr = BMP280_I2C_ADDRESS_0;
 	bmp280.i2c = &hi2c1;
 
-	HAL_Delay(500);
-//		if (Conf_NRF_Rx()==1){							// configure NRF as receiver
-//			size_UART = sprintf((char *)Data, "Conf Rx OK\n\r");
-//			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-//		}else{
-//			size_UART = sprintf((char *)Data, "Conf Rx BAD\n\r");
-//			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-//		}
-		Conf_NRF_Rx();
-
-
-	while (!bmp280_init(&bmp280, &bmp280.params)) {
-		size_UART = sprintf((char *)Data, "BMP280 initialization failed\n");
-		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-		HAL_Delay(2000);
+	HAL_Delay(100);
+	Conf_NRF_Rx();
+	HAL_Delay(100);
+	if (!bmp280_init(&bmp280, &bmp280.params)) {
+		buffer_TX[0] |= (1<<2);																														// если датчик не отвечает
+	}else{																																							// то датчик неисправен
+		buffer_TX[0] &= ~(1<<2);																													//
 	}
-	bool bme280p = bmp280.id == BME280_CHIP_ID;
-	size_UART = sprintf((char *)Data, "Sensor found %s\n\r", bme280p ? "BME280" : "BMP280");
-	HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);	
-	
-	
+//	bool bme280p = bmp280.id == BME280_CHIP_ID;
+//	size_UART = sprintf((char *)Data, "Sensor found %s\n\r", bme280p ? "BME280" : "BMP280");
+//	HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);	
 	
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {	
-//		check_NRF(); // Если нужно будет Принимать данные
-		if (Tcounter >= TIME_FLASH_LED) {
-			GPIOB->ODR^=(GPIO_PIN_1);
-			Tcounter = 0;	
-		}
-
-		if (Tcounter1 >= TIME_SENDING) {		// Каждые 5 сек выполняем
-			Tcounter1 = 0;
-	
-		while (!bmp280_read_float(&bmp280, &temperature, &pressure, &humidity)) {
-			size_UART = sprintf((char *)Data, "Temperature/pressure reading failed\n");
-			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);
-			HAL_Delay(2000);
+//		if (Tcounter1 >= 0) {//TIME_SENDING) {		// Каждые 5 сек // Читаем новые данные
+//			Tcounter1 = 0;
+			if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == 0){																			// Читаем датчик дождя
+				buffer_TX[0] |=(1<<1);																														// есть дождь
+			}	else {																																						//
+				buffer_TX[0] &=~(1<<1);																														// нет дождя
+			}																																										//		
+			if (!bmp280_read_float(&bmp280, &temperature, &pressure, &humidity)) {							// Читаем датчик погоды
+				buffer_TX[0] |= (1<<2);																														// если датчик не отвечает
+			}else{																																							// то датчик неисправен
+				buffer_TX[0] &= ~(1<<2);																													//
 			}
-
-			
+			if (pressure == 0){																																	// если измеренное давление
+				buffer_TX[0] |= (1<<2);																														// равно 0 
+			}else{																																							// то датчик неисправен
+				buffer_TX[0] &= ~(1<<2);																													//
+			}			
 			uint16_t rezAtmPressureGPa_uint =  (uint16_t)pressure;
 			uint16_t rezHumidity_uint =        (uint16_t)(humidity * 10);
 			int16_t rezTemperature_int = (int16_t)(temperature * 10);			
 			uint16_t rezAtmPressure_uint = (uint16_t)pressure * 0.75;
-			
-			
-		size_UART = sprintf((char *)Data,"Pressure: %.2f GPa, Temperature: %.2f C, Humidity: %.2f\n\r",
-				pressure, temperature, humidity);
-		HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		
-
-//_______________________________________
-//№ байта  |    описание   buffer_TX[]   |
-//_________|_____________________________| 
-//   0     |    статус - LSB 
-//   1     |    статус - MSB 
-//   2     |    температура int16_t - LSB 
-//   3     |    температура int16_t - MSB 
-//   4     |    влажность uint16_t   - LSB 
-//   5     |    влажность uint16_t   - MSB 
-//   6     |    давление, мм. рт. ст uint16_t - LSB 
-//   7     |    давление, мм. рт. ст uint16_t - MSB 
-//   8     |    давление, гПа uint16_t - LSB 
-//   9     |    давление, гПа uint16_t - MSB      		
-
+				
+//			size_UART = sprintf((char *)Data,"Pressure: %.2f GPa, Temperature: %.2f C, Humidity: %.2f\n\r",
+//					pressure, temperature, humidity);
+//			HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		
+			//_______________________________________
+			//№ байта  |    описание   buffer_TX[]   |
+			//_________|_____________________________|  
+			//   0     |    статус 
+			//   1     |    температура int16_t - LSB 
+			//   2     |    температура int16_t - MSB 
+			//   3     |    влажность uint16_t   - LSB 
+			//   4     |    влажность uint16_t   - MSB 
+			//   5     |    давление, мм. рт. ст uint16_t - LSB 
+			//   6     |    давление, мм. рт. ст uint16_t - MSB 
+			//   7     |    давление, гПа uint16_t - LSB 
+			//   8     |    давление, гПа uint16_t - MSB      		
+			/*у нас нульовий байт статус
+					перший біт в 1 - є дощ. 
+					перший біт в 0 - нема дощу
+					другий біт в 1 - несправність датчика погоди
+					другий біт в 0 - все ок
+					третій біт в 1 - напруга на контроллері менше 2.5 вольт
+					третій біт в 0 - напруга ОК*/			
+			buffer_TX[1]=rezTemperature_int & 0xFF;	// LSB
+			buffer_TX[2]=rezTemperature_int >> 8;		// MSB
+			buffer_TX[3]=rezHumidity_uint & 0xFF;
+			buffer_TX[4]=rezHumidity_uint >> 8;
+			buffer_TX[5]=rezAtmPressure_uint & 0xFF;
+			buffer_TX[6]=rezAtmPressure_uint >> 8;
+			buffer_TX[7]=rezAtmPressureGPa_uint & 0xFF;
+			buffer_TX[8]=rezAtmPressureGPa_uint >> 8;
 		
-//		buffer_TX[0]=0;
-		buffer_TX[0]=0;
-		buffer_TX[1]=rezTemperature_int & 0xFF;	// LSB
-		buffer_TX[2]=rezTemperature_int >> 8;		// MSB
-		buffer_TX[3]=rezHumidity_uint & 0xFF;
-		buffer_TX[4]=rezHumidity_uint >> 8;
-		buffer_TX[5]=rezAtmPressure_uint & 0xFF;
-		buffer_TX[6]=rezAtmPressure_uint >> 8;
-		buffer_TX[7]=rezAtmPressureGPa_uint & 0xFF;
-		buffer_TX[8]=rezAtmPressureGPa_uint >> 8;
-		
-
-	
 			send_data_NRF(buffer_TX,RF_DATA_SIZE);
 			if (status_TX ==1){
-				status_TX = 0;
-				
+				status_TX = 0;			
 			}//	else {
-//							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
-//							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
-//						}	
-
-
-
-			
-		}	
+			//							size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
+			//							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
+			//}			
+			HAL_PWR_EnterSTANDBYMode();
+//		}	
+		
+		
+		
   }
 }
 
@@ -176,18 +168,20 @@ int main(void)
 void SystemClock_Config(void)
 {
 	
-	  RCC_OscInitTypeDef RCC_OscInitStruct;
+	RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
-
+//	RCC_PeriphCLKInitTypeDef PeriphClkInit;
     /**Configure the main internal regulator output voltage 
     */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
+  __HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_PWR_PVD_EXTI_ENABLE_IT();
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_DIV4;//RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
+	RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -200,7 +194,7 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;//RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
@@ -218,68 +212,22 @@ void SystemClock_Config(void)
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-	
-	
-	
-	
-	
-	
-	
-//  RCC_OscInitTypeDef RCC_OscInitStruct;
-//  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-//  RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
-//    /**Configure the main internal regulator output voltage 
-//    */
-//  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-//    /**Initializes the CPU, AHB and APB busses clocks 
-//    */
-//  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
-//  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-//  RCC_OscInitStruct.MSICalibrationValue = 0;
-//  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_5;
-//  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-//  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-
-//    /**Initializes the CPU, AHB and APB busses clocks 
-//    */
-//  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-//                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-//  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
-//  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-//  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-//  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-//  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-
-//  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_I2C1;
-//  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-//  PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
-//  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-
-//    /**Configure the Systick interrupt time 
-//    */
-//  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-//    /**Configure the Systick 
-//    */
-//  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-//  /* SysTick_IRQn interrupt configuration */
-//  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
+/* IWDG init function */
+static void MX_IWDG_Init(void)
+{
 
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_8;
+  hiwdg.Init.Window = 4095;
+  hiwdg.Init.Reload = 4095;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+}
 
 void MX_NVIC_Init(void)
 {
@@ -287,9 +235,11 @@ void MX_NVIC_Init(void)
   HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM2_IRQn);
 	
-		HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
-		HAL_NVIC_EnableIRQ(USART2_IRQn);	
+	HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(USART2_IRQn);	
 	
+	HAL_NVIC_SetPriority(PVD_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(PVD_IRQn);	
 }
 
 
@@ -432,7 +382,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PB1 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);

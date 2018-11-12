@@ -8,18 +8,26 @@
 #include "BMP280/bmp280.h"	// Description of registers and commands BMP280
 #include "NRF/NRF24L01.h"		// Description of registers and commands NRF24L01+
 
-// Setting of NRF24L01+
-//										M			E			T			E			O			//ASCII code
-//#define OWN_ADDRESS	{0x4D, 0x45, 0x54, 0x45, 0x4F}; // Own address
-//#define REMOTE_ADDRESS	{0x4D, 0x45, 0x54, 0x45, 0x4F}; // Remote address
-#define OWN_ADDRESS	"METEO"; // Own address
-#define REMOTE_ADDRESS	"METEO"; // Remote address
-#define CHAN		10 // channel number
-#define RF_DATA_SIZE		9 // size of sendind data, bytes
-#define RF_SPEED	RF_SETUP_250KBPS // size of sendind data: RF_SETUP_2MBPS, RF_SETUP_1MBPS or RF_SETUP_250KBPS
 
-#define TIME_SENDING		10 // Frequnce of sending data = 1/10 sek // 50 = 5 sek
-#define TIME_FLASH_LED		10 // Frequnce of flash led = 1/10 sek // 10 = 1 sek
+#define Power_Level		PWR_PVDLEVEL_3 	// PWR_PVDLEVEL_0 = 1,9v;
+																			// PWR_PVDLEVEL_1 = 2,1v;
+																			// PWR_PVDLEVEL_2 = 2,3v;
+																			// PWR_PVDLEVEL_3 = 2,5v;																			
+																			// PWR_PVDLEVEL_4 = 2,7v;
+																			// PWR_PVDLEVEL_5 = 2,9v;
+																			// PWR_PVDLEVEL_6 = 3,1v;
+
+
+// Setting of NRF24L01+
+
+#define OWN_ADDRESS	"METEO"; 				// Own address
+#define REMOTE_ADDRESS	"METEO"; 		// Remote address
+#define CHAN		10 									// channel number
+#define RF_DATA_SIZE		9 					// size of sendind data, bytes
+#define RF_SPEED	RF_SETUP_250KBPS 	// size of sendind data: RF_SETUP_2MBPS, RF_SETUP_1MBPS or RF_SETUP_250KBPS
+
+#define TIME_SENDING		10 					// Frequnce of sending data = 1/10 sek // 50 = 5 sek
+#define TIME_FLASH_LED		10 				// Frequnce of flash led = 1/10 sek // 10 = 1 sek
 //See also settings have in file NRF24L01.c
 
 // SPI setting
