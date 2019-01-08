@@ -509,6 +509,11 @@
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_cortex.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32l0xx_hal_iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_iwdg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

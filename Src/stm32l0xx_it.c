@@ -36,6 +36,9 @@
 #include "stm32l0xx_it.h"
 
 /* USER CODE BEGIN 0 */
+extern RTC_HandleTypeDef hrtc;
+
+
 
 /* USER CODE END 0 */
 
@@ -44,7 +47,20 @@
 /******************************************************************************/
 /*            Cortex-M0+ Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
+/**
+* @brief This function handles RTC global interrupt through EXTI lines 17, 19 and 20 and LSE CSS interrupt through EXTI line 19.
+*/
+void RTC_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_IRQn 0 */
 
+  /* USER CODE END RTC_IRQn 0 */
+	HAL_RTCEx_WakeUpTimerIRQHandler(&hrtc);
+
+  /* USER CODE BEGIN RTC_IRQn 1 */
+
+  /* USER CODE END RTC_IRQn 1 */
+}
 /**
 * @brief This function handles Non maskable interrupt.
 */
@@ -57,6 +73,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
+
 
 /**
 * @brief This function handles Hard fault interrupt.

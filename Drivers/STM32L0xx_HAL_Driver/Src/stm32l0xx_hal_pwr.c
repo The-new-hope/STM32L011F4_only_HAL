@@ -590,7 +590,7 @@ void HAL_PWR_EnterSTOPMode(uint32_t Regulator, uint8_t STOPEntry)
   * @retval None
   */
 void HAL_PWR_EnterSTANDBYMode(void)
-{
+{	
   /* Select Standby mode */
   SET_BIT(PWR->CR, PWR_CR_PDDS);
 

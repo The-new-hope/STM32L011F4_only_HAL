@@ -40,6 +40,7 @@
 #include "stm32l0xx_hal.h"
 #include "header.h"
 extern void _Error_Handler(char *, int);
+extern RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -274,7 +275,43 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
+{
 
+  if(hrtc->Instance==RTC)
+  {
+  /* USER CODE BEGIN RTC_MspInit 0 */
+
+  /* USER CODE END RTC_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_RTC_ENABLE();
+    /* RTC interrupt Init */
+
+    HAL_PWR_EnableBkUpAccess();
+		
+  }
+
+}
+
+void HAL_RTC_MspDeInit(RTC_HandleTypeDef* hrtc)
+{
+
+  if(hrtc->Instance==RTC)
+  {
+  /* USER CODE BEGIN RTC_MspDeInit 0 */
+
+  /* USER CODE END RTC_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_RTC_DISABLE();
+
+    /* RTC interrupt DeInit */
+    HAL_NVIC_DisableIRQ(RTC_IRQn);
+  /* USER CODE BEGIN RTC_MspDeInit 1 */
+
+  /* USER CODE END RTC_MspDeInit 1 */
+  }
+
+}
 /* USER CODE END 1 */
 
 /**
