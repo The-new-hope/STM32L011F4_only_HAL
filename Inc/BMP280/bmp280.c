@@ -44,7 +44,11 @@
 
 #define BMP280_RESET_VALUE     0xB6
 
-
+void bmp280_init_sleep_params(bmp280_params_t *params) {
+	params->mode = BMP280_MODE_SLEEP;
+	params->filter = BMP280_FILTER_OFF;
+	params->standby = BMP280_STANDBY_05;
+}
 
 void bmp280_init_default_params(bmp280_params_t *params) {
 	params->mode = BMP280_MODE_NORMAL;

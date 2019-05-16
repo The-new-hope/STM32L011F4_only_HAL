@@ -149,19 +149,24 @@ void on_packet(uint8_t * buf, uint8_t size) {
 // buf - буфер с данными, size - длина данных (от 1 до 32)
 uint8_t send_data_NRF(uint8_t * buf, uint8_t size) {
 	CE0; 													// Если в режиме приёма, то выключаем его
-	NRF_write_buf(W_TX_PAYLOAD, buf, size); 				// Запись данных на отправку	
-	Conf_NRF_Tx(); 											// configuring as transmitter and send data
+	NRF_write_buf(W_TX_PAYLOAD, buf, size); 				// Запись данных на отправку											
+	
+	if (!Conf_NRF_Tx()){														// configuring as transmitter and send data
+		NVIC_SystemReset();
+	}
+
+	
 //							size_UART = sprintf((char *)Data, "I wait interrupt...\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////
 //							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);	///////////////////////////////////////////////строка для отладки////////////////////////////////////
 	
  	while(IRQ_is_interrupt() != 1){ 						// Ждём 2 сек прерывания с квитанцией
-		if (Tcounter1 >=20){
+		if (Tcounter1 >=40){
 //							size_UART = sprintf((char *)Data, "I didnt wait interrupt(((\n\r");////////////////////////////////////строка для отладки/////////////////////////////////////
 //							HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);			/////////////////////////////////////////////строка для отладки/////////////////////////////////////
 			break;}
 	}
 		
-	DelayMicro(40);
+	DelayMicro(80);
 	uint8_t status = NRF_readreg(STATUS);					//read register STATUS
 	if (status & (1 << TX_DS)){
 		status_TX = 1;  									// Если всё хорошо, возвращаем  1 передача удалась		
@@ -206,7 +211,9 @@ uint8_t Conf_NRF_Tx(){
 		NRF_writereg(RX_PW_P0,RF_DATA_SIZE);//размер поля данных, байт.
 //	  NRF_writereg(ENAA_P4,0);//выключить автоподтверждение по каналу 0
 		NRF_writereg(RF_CH, CHAN); // Выбор частотного канала
-	  NRF_writereg(RF_SETUP, RF_SPEED); // выбор скорости 250 kбит/с и мощности 0dBm
+		NRF_writereg(RF_SETUP, RF_SETUP_0DBM);// выбор мощности 0dBm	
+	  NRF_writereg(RF_SETUP, RF_SPEED); // выбор скорости 250 kбит/с
+
 	  NRF_writereg(SETUP_RETR, SETUP_RETR_DELAY_1000MKS); // Delay for speed 250 kбит/с	
 	  NRF_writereg_buf(RX_ADDR_P0, &remote_addr[0], 5); // Подтверждения приходят на канал 0
 	  NRF_writereg_buf(TX_ADDR, &remote_addr[0], 5);
@@ -215,7 +222,7 @@ uint8_t Conf_NRF_Tx(){
 	  CE1;
 	  DelayMicro(15);
 	  CE0;
-	  DelayMicro(140);
+	  DelayMicro(150);
 	  return (NRF_readreg(CONFIG) == ((1 << EN_CRC)|(1<<CRCO) | (1 << PWR_UP) | (0 << PRIM_RX) | (0 << MASK_MAX_RT))) ? 1 : 0;
  }
 

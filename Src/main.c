@@ -18,6 +18,7 @@ uint8_t Tcounter = 0;
 uint8_t Tcounter1 = 0;
 uint16_t size_UART;
 uint8_t Data[100];
+uint8_t attempt = 0;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
@@ -28,6 +29,7 @@ static void MX_TIM2_Init(void);
 static void MX_NVIC_Init(void);
 //static void MX_IWDG_Init(void);
 static void MX_RTC_Init(void);
+
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -53,12 +55,14 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
   /* Initialize all configured peripherals */
+	
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_SPI1_Init();
   MX_I2C1_Init();
   MX_TIM2_Init();
 	MX_NVIC_Init();
+	
 //  MX_IWDG_Init();	
 	MX_RTC_Init();
 	HAL_UART_MspInit(&huart2);
@@ -66,18 +70,21 @@ int main(void)
 	HAL_TIM_Base_Start(&htim2);
   HAL_TIM_Base_Start_IT(&htim2);
 
-	sConfigPVD.PVDLevel = Power_Level;
+	sConfigPVD.PVDLevel = Power_Level_Volt;
   sConfigPVD.Mode = PWR_PVD_MODE_IT_RISING;
   HAL_PWR_ConfigPVD(&sConfigPVD);	
-	
+//	HAL_Delay(500);	
   HAL_PWR_EnablePVD();	
-	
+//	HAL_Delay(500);		
 	bmp280_init_default_params(&bmp280.params);
 	bmp280.addr = BMP280_I2C_ADDRESS_0;
 	bmp280.i2c = &hi2c1;
 
-//	HAL_Delay(100);
-	Conf_NRF_Rx();
+
+	if (!Conf_NRF_Rx()){
+		NVIC_SystemReset();
+	}
+	
 	HAL_Delay(100);
 	if (!bmp280_init(&bmp280, &bmp280.params)) {
 		buffer_TX[0] |= (1<<2);																														// если датчик не отвечает
@@ -90,12 +97,12 @@ int main(void)
 	
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	HAL_Delay(200);
+//	HAL_Delay(100);
 
   while (1)
   {	
 			
-			HAL_Delay(1000);
+			HAL_Delay(100);
 			if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == 0){																			// Читаем датчик дождя
 				buffer_TX[0] |=(1<<1);																														// есть дождь
 			}	else {																																						//
@@ -147,18 +154,28 @@ int main(void)
 			buffer_TX[7]=rezAtmPressureGPa_uint & 0xFF;
 			buffer_TX[8]=rezAtmPressureGPa_uint >> 8;
 		
+		
 			send_data_NRF(buffer_TX,RF_DATA_SIZE);
+			while (status_TX !=1){
+						size_UART = sprintf((char *)Data, "Transmit Bad!!! %u \n\r",buffer_TX[0]);/////////////////////////////////////строка для отладки///////////////////////////////////////////////
+						HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////	
+				send_data_NRF(buffer_TX,RF_DATA_SIZE);
+//				attempt++;
+//				if (attempt == 3){ break;}			
+			}
 			if (status_TX ==1){
 				status_TX = 0;	
-										size_UART = sprintf((char *)Data, "Transmit OK\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
+										size_UART = sprintf((char *)Data, "Transmit OK %u \n\r",buffer_TX[0]);/////////////////////////////////////строка для отладки///////////////////////////////////////////////
 										HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////				
-			}	else {
-										size_UART = sprintf((char *)Data, "Transmit Bad!!!\n\r");/////////////////////////////////////строка для отладки///////////////////////////////////////////////
-										HAL_UART_Transmit(&huart2, Data, size_UART, 0xFFFF);		/////////////////////////////////////строка для отладки////////////////////////////////////////////////
-			}
-
+			}			
+			CE0;
+			NRF_writereg(CONFIG,0);
+			
+			bmp280_init_sleep_params(&bmp280.params);
+			bmp280_init(&bmp280, &bmp280.params);
 			__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU);
-			HAL_PWR_EnterSTANDBYMode();	
+
+			HAL_PWR_EnterSTANDBYMode();	// уход в STANDBY
   } //end while(1)
 }// end main (void)
 
@@ -174,7 +191,7 @@ void SystemClock_Config(void)
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
     /**Configure the main internal regulator output voltage 
     */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
   __HAL_RCC_PWR_CLK_ENABLE();
 	__HAL_PWR_PVD_EXTI_ENABLE_IT();
     /**Initializes the CPU, AHB and APB busses clocks 
@@ -186,10 +203,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_5;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
+  {    _Error_Handler(__FILE__, __LINE__);  }
     /**Initializes the CPU, AHB and APB busses clocks 
     */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
@@ -198,31 +212,71 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
+  {    _Error_Handler(__FILE__, __LINE__);  }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }	
-	
-	
+  {   _Error_Handler(__FILE__, __LINE__);  }		
     /**Configure the Systick interrupt time 
     */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
     /**Configure the Systick 
     */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);	
 
+	
+//  RCC_OscInitTypeDef RCC_OscInitStruct;
+//  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+//	RCC_PeriphCLKInitTypeDef PeriphClkInit;
+//    /**Configure the main internal regulator output voltage 
+//    */
+//  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+//  __HAL_RCC_PWR_CLK_ENABLE();
+//	__HAL_PWR_PVD_EXTI_ENABLE_IT();	
+//    /**Initializes the CPU, AHB and APB busses clocks 
+//    */
+// RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI;
+//  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+//  RCC_OscInitStruct.HSICalibrationValue = 16;
+//  RCC_OscInitStruct.LSIState = RCC_LSI_ON;	
+//  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+//  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
+
+//    /**Initializes the CPU, AHB and APB busses clocks 
+//    */
+//  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+//                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+//  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+//  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+//  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+//  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+//  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+//  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+//  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }			
+//	
+//  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
+//    /**Configure the Systick interrupt time 
+//    */
+//  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+//    /**Configure the Systick 
+//    */
+//  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+//  /* SysTick_IRQn interrupt configuration */
+//  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+	
 }
 
 /* RTC init function */
@@ -257,7 +311,7 @@ static void MX_RTC_Init(void)
 //{
 
 //  hiwdg.Instance = IWDG;
-//  hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+//  hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
 //  hiwdg.Init.Window = 4095;
 //  hiwdg.Init.Reload = 4095;
 //  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
@@ -423,7 +477,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : PB1 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
@@ -470,6 +524,7 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 /**
   * @}

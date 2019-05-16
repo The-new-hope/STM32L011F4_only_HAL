@@ -403,9 +403,9 @@ Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0+ --apcs=inter
 work --depend=666_l011f4_only_hal\startup_stm32l011xx.d -o666_l011f4_only_hal\s
 tartup_stm32l011xx.o -I.\RTE\_666_L011F4_only_HAL -IC:\Keil_v5\ARM\PACK\ARM\CMS
 IS\5.4.0\CMSIS\Core\Include -IC:\Keil_v5\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Devi
-ce\Include --predefine="__EVAL SETA 1" --predefine="__MICROLIB SETA 1" --predef
-ine="__UVISION_VERSION SETA 523" --predefine="_RTE_ SETA 1" --predefine="STM32L
-011xx SETA 1" --list=startup_stm32l011xx.lst startup_stm32l011xx.s
+ce\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 
+523" --predefine="_RTE_ SETA 1" --predefine="STM32L011xx SETA 1" --list=startup
+_stm32l011xx.lst startup_stm32l011xx.s
 
 
 
@@ -845,4 +845,4 @@ Symbol: __main
       At line 166 in file startup_stm32l011xx.s
 Comment: __main used once
 2 symbols
-380 symbols in table
+379 symbols in table
